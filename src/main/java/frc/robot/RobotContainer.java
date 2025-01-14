@@ -50,6 +50,9 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
+
+        Constants.initialize();
+
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
@@ -60,6 +63,8 @@ public class RobotContainer {
                     .withRotationalRate(-rightDriveJoystick.getX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
+
+
 
         leftButtonA.whileTrue(drivetrain.applyRequest(() -> brake));
         leftButtonB.whileTrue(drivetrain.applyRequest(() ->
