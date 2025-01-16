@@ -16,8 +16,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
-  private final boolean kUseLimelight = false;
-
   private final RobotContainer m_robotContainer;
 
   public Robot() {
@@ -27,18 +25,16 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run(); 
-    
-    if (kUseLimelight) {
+
       var driveState = m_robotContainer.drivetrain.getState();
       double headingDeg = driveState.Pose.getRotation().getDegrees();
-      double headingDeg2 = driveState.Pose.getRotation().getDegrees();
 
       double omegaRps = Units.radiansToRotations(driveState.Speeds.omegaRadiansPerSecond);
 
-      LimelightHelpers.SetRobotOrientation("limelightleft", headingDeg, 0, 0, 0, 0, 0);
-      LimelightHelpers.SetRobotOrientation("limelightright", headingDeg, 0, 0, 0, 0, 0);
-      var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelightleft");
-      var llMeasurement2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelightright");
+      LimelightHelpers.SetRobotOrientation("limelight-left", headingDeg, 0, 0, 0, 0, 0);
+      LimelightHelpers.SetRobotOrientation("limelight-right", headingDeg, 0, 0, 0, 0, 0);
+      var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-left");
+      var llMeasurement2 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-right");
       if (llMeasurement != null && llMeasurement.tagCount > 0 && omegaRps < 2.0) {
         m_robotContainer.drivetrain.addVisionMeasurement(llMeasurement.pose, Utils.fpgaToCurrentTime(llMeasurement.timestampSeconds));
       }
@@ -46,9 +42,6 @@ public class Robot extends TimedRobot {
         m_robotContainer.drivetrain.addVisionMeasurement(llMeasurement2.pose, Utils.fpgaToCurrentTime(llMeasurement2.timestampSeconds));
       }
 
-      SwerveDrivePoseEstimator.update();
-
-    }
   }
 
   @Override
