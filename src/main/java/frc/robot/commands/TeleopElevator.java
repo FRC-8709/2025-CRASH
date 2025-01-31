@@ -1,7 +1,6 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -12,14 +11,14 @@ public class TeleopElevator extends Command {
 
     private double speed = 0;
     private final Elevator m_subsystem;
-    private final Joystick leftOpStick;
+    private final Joystick leftOpJoystick;
     private final Encoder elevatorEncoder;
     private final DigitalInput topLimitSwitch;
     private final DigitalInput bottomLimitSwitch;
 
-    public TeleopElevator(Elevator m_subsystem, Joystick leftOpStick, Encoder elevatorEncoder, DigitalInput topLimitSwitch, DigitalInput bottomLimitSwitch) {
+    public TeleopElevator(Elevator m_subsystem, Joystick leftOpJoystick, Encoder elevatorEncoder, DigitalInput topLimitSwitch, DigitalInput bottomLimitSwitch) {
     this.m_subsystem = m_subsystem;
-    this.leftOpStick = leftOpStick;
+    this.leftOpJoystick = leftOpJoystick;
     this.elevatorEncoder = elevatorEncoder;
     this.topLimitSwitch = topLimitSwitch;
     this.bottomLimitSwitch = bottomLimitSwitch;
@@ -33,16 +32,16 @@ public class TeleopElevator extends Command {
         SmartDashboard.putBoolean("topLimitSwitch", !topLimitSwitch.get());
         SmartDashboard.putBoolean("bottomLimitSwitch", !bottomLimitSwitch.get());
 
-        if ( leftOpStick.getRawButton(5)) {
+        if ( leftOpJoystick.getRawButton(5)) {
             speed = 12;
         }
-        else if ( leftOpStick.getRawButton(3)) {
+        else if ( leftOpJoystick.getRawButton(3)) {
             speed = -6;
         }
-        else if (leftOpStick.getRawButton(4) && elevatorEncoder.get() > 0.2) {
+        else if (leftOpJoystick.getRawButton(4) && elevatorEncoder.get() > 0.2) {
             speed = -3;
         }
-        else if (leftOpStick.getRawButton(6) && elevatorEncoder.get() < 0.8) {
+        else if (leftOpJoystick.getRawButton(6) && elevatorEncoder.get() < 0.8) {
             speed = 3;
         }
         else {

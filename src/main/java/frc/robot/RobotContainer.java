@@ -6,27 +6,34 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
-import frc.robot.commands.Limelight;
+import frc.robot.commands.TeleopCoralIntake;
+import frc.robot.commands.TeleopElevator;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.CoralIntake;
+import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Paths;
 
 public class RobotContainer {
     //private final SendableChooser<Command> autoChooser;
+
+    private final CoralIntake s_CoralIntake = new CoralIntake(new TalonFX(Constants.CoralIntakeConstants.coralIntakeMotorPort));
+    private final Elevator s_Elevator = new Elevator(new TalonFX(Constants.ElevatorConstants.leftElevatorMotorPort), new TalonFX(Constants.ElevatorConstants.rightElevatorMotorPort));
 
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
@@ -43,16 +50,43 @@ public class RobotContainer {
     private final CommandXboxController joystick = new CommandXboxController(0);
 
     private final Joystick leftDriveJoystick = new Joystick(0);
-    private final Joystick rightDriveJoystick = new Joystick(1);
+    private final Joystick rightDriveJoystick = new Joystick(3);
+    private final Joystick leftOpJoystick = new Joystick(2);
+    private final Joystick rightOpJoystick = new Joystick(1);
 
-    private final JoystickButton leftButtonA = new JoystickButton(leftDriveJoystick, 3);
-    private final JoystickButton leftButtonB = new JoystickButton(leftDriveJoystick, 4);
-    private final JoystickButton leftTrigger = new JoystickButton(leftDriveJoystick, 1);
+    private final JoystickButton leftDriveButton3 = new JoystickButton(leftDriveJoystick, 3);
+    private final JoystickButton leftDriveButton4 = new JoystickButton(leftDriveJoystick, 4);
+    private final JoystickButton leftDriveButton6 = new JoystickButton(leftDriveJoystick, 6);
+
+    private final JoystickButton leftOpButton7 = new JoystickButton(leftOpJoystick, 7);
+    private final JoystickButton leftOpButton8 = new JoystickButton(leftOpJoystick, 8);
+    private final JoystickButton leftOpButton9 = new JoystickButton(leftOpJoystick, 9);
+    private final JoystickButton leftOpButton10 = new JoystickButton(leftOpJoystick, 10);
+    private final JoystickButton leftOpButton11 = new JoystickButton(leftOpJoystick, 11);
+    private final JoystickButton leftOpButton12 = new JoystickButton(leftOpJoystick, 12);
+    private final JoystickButton leftOpTrigger = new JoystickButton(leftOpJoystick, 1);
+
+    private final JoystickButton rightOpButton7 = new JoystickButton(rightOpJoystick, 7);
+    private final JoystickButton rightOpButton8 = new JoystickButton(rightOpJoystick, 8);
+    private final JoystickButton rightOpButton9 = new JoystickButton(rightOpJoystick, 9);
+    private final JoystickButton rightOpButton10 = new JoystickButton(rightOpJoystick, 10);
+    private final JoystickButton rightOpButton11 = new JoystickButton(rightOpJoystick, 11);
+    private final JoystickButton rightOpButton12 = new JoystickButton(rightOpJoystick, 12);
+    private final JoystickButton rightOpTrigger = new JoystickButton(rightOpJoystick, 1);
+
+    private final DigitalInput topBreakBeam = new DigitalInput(Constants.CoralIntakeConstants.topBreakBeamPort);
+    private final Encoder elevatorEncoder = new Encoder(Constants.ElevatorConstants.elevatorEncoderPortA, Constants.ElevatorConstants.elevatorEncoderPortB);
+    private final DigitalInput topLimitSwitch = new DigitalInput(Constants.ElevatorConstants.topLimitSwitchPort);
+    private final DigitalInput bottomLimitSwitch = new DigitalInput(Constants.ElevatorConstants.bottomLimitSwitchPort);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
+    public final Paths m_Paths = new Paths(drivetrain);
+
     public RobotContainer() {
         configureBindings();
+        s_CoralIntake.setDefaultCommand(new TeleopCoralIntake(s_CoralIntake, rightOpJoystick));
+        s_Elevator.setDefaultCommand(new TeleopElevator(s_Elevator, leftOpJoystick, elevatorEncoder, topLimitSwitch, bottomLimitSwitch));
     }
 
     private void configureBindings() {
@@ -71,10 +105,52 @@ public class RobotContainer {
         );
 
 
+        leftOpButton7.onTrue(
+                m_Paths.goToPose(new Pose2d(6.198, 3.941, Rotation2d.fromDegrees(180)
+                )));
+        leftOpButton8.onTrue(
+                m_Paths.goToPose(new Pose2d(5.391, 2.543, Rotation2d.fromDegrees(120)
+                )));
+        leftOpButton9.onTrue(
+                m_Paths.goToPose(new Pose2d(3.994, 2.946, Rotation2d.fromDegrees(60)
+                )));
+        leftOpButton10.onTrue(
+                m_Paths.goToPose(new Pose2d(2.684, 4.002, Rotation2d.fromDegrees(0)
+                )));
+        leftOpButton11.onTrue(
+                m_Paths.goToPose(new Pose2d(5.617, 5.542, Rotation2d.fromDegrees(-60)
+                )));
+        leftOpButton12.onTrue(
+                m_Paths.goToPose(new Pose2d(5.368, 5.507, Rotation2d.fromDegrees(-120)
+                )));
+        leftOpTrigger.onTrue(
+                m_Paths.goToPose(new Pose2d(1.274, 1.108, Rotation2d.fromDegrees(-125)
+                )));
 
+        rightOpButton7.onTrue(
+                m_Paths.goToPose(new Pose2d(14.808, 4.002, Rotation2d.fromDegrees(180)
+                )));
+        rightOpButton8.onTrue(
+                m_Paths.goToPose(new Pose2d(13.909, 2.520, Rotation2d.fromDegrees(120)
+                )));
+        rightOpButton9.onTrue(
+                m_Paths.goToPose(new Pose2d(12.182, 2.473, Rotation2d.fromDegrees(60)
+                )));
+        rightOpButton10.onTrue(
+                m_Paths.goToPose(new Pose2d(11.272, 4.037, Rotation2d.fromDegrees(0)
+                )));
+        rightOpButton11.onTrue(
+                m_Paths.goToPose(new Pose2d(12.182, 5.589, Rotation2d.fromDegrees(-60)
+                )));
+        rightOpButton12.onTrue(
+                m_Paths.goToPose(new Pose2d(13.991, 5.530, Rotation2d.fromDegrees(-120)
+                )));
+        rightOpTrigger.onTrue(
+                m_Paths.goToPose(new Pose2d(16.313, 1.154, Rotation2d.fromDegrees(-60)
+                )));
 
-        leftButtonA.whileTrue(drivetrain.applyRequest(() -> brake));
-        leftButtonB.whileTrue(drivetrain.applyRequest(() ->
+        leftDriveButton3.whileTrue(drivetrain.applyRequest(() -> brake));
+        leftDriveButton4.whileTrue(drivetrain.applyRequest(() ->
             point.withModuleDirection(new Rotation2d(-leftDriveJoystick.getY(), -leftDriveJoystick.getX()))
         ));
 
@@ -86,7 +162,7 @@ public class RobotContainer {
         joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         // reset the field-centric heading on left bumper press
-        leftTrigger.onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        leftDriveButton6.onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
 

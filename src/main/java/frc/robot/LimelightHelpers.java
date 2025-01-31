@@ -1238,7 +1238,7 @@ public class LimelightHelpers {
     }
 
     /**
-     * Gets the MegaTag2 Pose2d and timestamp for use with WPILib pose estimator (addVisionMeasurement) in the WPILib Blue alliance coordinate system.
+     * Gets the MegaTag2 Pose2d and timefstamp for use with WPILib pose estimator (addVisionMeasurement) in the WPILib Blue alliance coordinate system.
      * Make sure you are calling setRobotOrientation() before calling this method.
      * 
      * @param limelightName
