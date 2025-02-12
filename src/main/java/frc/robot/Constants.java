@@ -16,10 +16,10 @@ public class Constants {
         }
     }
     public class CoralIntakeConstants {
-        public static int topBreakBeamPort = 9;
-        public static int bottomBreakBeamPort = 10;
-        public static int coralIntakeMotorPort = 11;
-        public static final VoltageOut kCoralIntakeVoltageOut = new VoltageOut(24);
+    //     public static int topBreakBeamPort = 9;
+    //     public static int bottomBreakBeamPort = 10;
+        public static int coralIntakeMotorPort = 24;
+        public static final VoltageOut kCoralIntakeVoltageOut = new VoltageOut(0);
     }
     public class PathPlannerConstants {
         public static final PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI);
@@ -28,10 +28,7 @@ public class Constants {
     public static final class ElevatorConstants {
         public static final VoltageOut kElevatorVoltageOut = new VoltageOut(0);
 
-        public static final int topLimitSwitchPort =  5;
-        public static final int bottomLimitSwitchPort = 0;
-        public static final int elevatorEncoderPortA = 9;
-        public static final int elevatorEncoderPortB = 8;
+        public static final int bottomLimitSwitchPort = 8;
 
         public static final int leftElevatorMotorPort = 28;
         public static final int rightElevatorMotorPort = 29;

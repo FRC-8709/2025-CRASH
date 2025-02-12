@@ -24,11 +24,18 @@ public class TeleopCoralIntake extends Command {
             speed = 4;
         }
         else if ( rightOpJoystick.getRawButton(3)) {
-            speed = -4;
+            speed = 2;
+        }
+        else if ( rightOpJoystick.getRawButton(4)) {
+            speed = 1;
+        }
+        else if (rightOpJoystick.getRawButton(6)) {
+            speed = -1;
         }
         else {
             speed = 0;
         }
         m_subsystem.setMotorSpeed(speed);
     }
+    //fortnitegiddy
 }
