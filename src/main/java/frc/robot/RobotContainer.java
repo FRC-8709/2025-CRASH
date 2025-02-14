@@ -6,19 +6,28 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
+import frc.robot.commands.TeleopClimb;
+import frc.robot.commands.TeleopCoralIntake;
+import frc.robot.commands.TeleopElevator;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.Climb;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.CoralIntake;
+import frc.robot.subsystems.Elevator;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -37,18 +46,26 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    private final Joystick leftDriveStick = new Joystick(0);
-    private final Joystick rightDriveStick = new Joystick(1);
-    private final Joystick leftOpStick = new Joystick(2);
-    private final Joystick rightOpStick = new Joystick(3);
+    private final Joystick leftDriveJoystick = new Joystick(0);
+    private final Joystick rightDriveJoystick = new Joystick(3);
+    private final Joystick leftOpJoystick = new Joystick(1);
+    private final Joystick rightOpJoystick = new Joystick(2);
 
-    private final JoystickButton leftDriveButton6 = new JoystickButton(leftDriveStick, 6);
-    private final JoystickButton leftDriveButton4 = new JoystickButton(leftDriveStick, 4);
-    private final JoystickButton leftDriveButton3 = new JoystickButton(leftDriveStick, 3);
-    private final JoystickButton leftDriveTrigger = new JoystickButton(leftDriveStick, 1);
+    private final JoystickButton leftDriveButton6 = new JoystickButton(leftDriveJoystick, 6);
+    private final JoystickButton leftDriveButton4 = new JoystickButton(leftDriveJoystick, 4);
+    private final JoystickButton leftDriveButton3 = new JoystickButton(leftDriveJoystick, 3);
+    private final JoystickButton leftDriveTrigger = new JoystickButton(leftDriveJoystick, 1);
+
+    private final Climb s_Climb = new Climb(new TalonFX(Constants.ClimberConstants.climberMotorPort));
+    private final CoralIntake s_CoralIntake = new CoralIntake(new TalonFX(Constants.CoralIntakeConstants.coralIntakeMotorPort));
+    private final Elevator s_Elevator = new Elevator(new TalonFX(Constants.ElevatorConstants.leftElevatorMotorPort), new TalonFX(Constants.ElevatorConstants.rightElevatorMotorPort));
 
     public RobotContainer() {
         configureBindings();
+
+        s_Climb.setDefaultCommand(new TeleopClimb(leftOpJoystick, s_Climb));
+        s_CoralIntake.setDefaultCommand(new TeleopCoralIntake(s_CoralIntake, rightOpJoystick));
+        s_Elevator.setDefaultCommand(new TeleopElevator(s_Elevator, leftOpJoystick, new DigitalInput(Constants.ElevatorConstants.bottomLimitSwitchPort)));
     }
 
     private void configureBindings() {
@@ -57,14 +74,14 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-leftDriveStick.getY() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-leftDriveStick.getX() * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-rightDriveStick.getX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+                drive.withVelocityX(-leftDriveJoystick.getY() * MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(-leftDriveJoystick.getX() * MaxSpeed) // Drive left with negative X (left)
+                    .withRotationalRate(-rightDriveJoystick.getX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
 
-        joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        joystick.b().whileTrue(drivetrain.applyRequest(() ->
+        leftDriveButton4.whileTrue(drivetrain.applyRequest(() -> brake));
+        leftDriveButton3.whileTrue(drivetrain.applyRequest(() ->
             point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
         ));
 
@@ -76,7 +93,7 @@ public class RobotContainer {
         joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         // reset the field-centric heading on left bumper press
-        joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        leftDriveButton6.onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }

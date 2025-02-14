@@ -34,4 +34,7 @@ public class Constants {
         public static final int rightElevatorMotorPort = 29;
     }
 
+    public static final class ClimberConstants {
+        public static final int climberMotorPort = 30;
+    }
 }
