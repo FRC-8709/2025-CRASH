@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.Angle;
@@ -19,11 +20,13 @@ public class Elevator extends SubsystemBase {
 
         masterMotor.setNeutralMode(NeutralModeValue.Brake);
         followerMotor.setNeutralMode(NeutralModeValue.Brake);
+        followerMotor.setControl(new Follower(masterMotor.getDeviceID(), true));
     }
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Elevator Position", masterMotor.getPosition().getValueAsDouble());
+        double elevatorPosition = Math.abs(getElevatorPosition().getValueAsDouble());
+        SmartDashboard.putNumber("Elevator Position", elevatorPosition);
     }
 
     public void setMotorSpeed(double speed) {
