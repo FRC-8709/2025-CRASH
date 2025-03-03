@@ -56,7 +56,8 @@ public class RobotContainer {
     private final Climb s_Climb = new Climb(new TalonFX(Constants.ClimberConstants.climberMotorPort));
     private final CoralIntake s_CoralIntake = new CoralIntake(new TalonFX(Constants.CoralIntakeConstants.coralIntakeMotorPort));
     private final Elevator s_Elevator = new Elevator(new TalonFX(Constants.ElevatorConstants.leftElevatorMotorPort), new TalonFX(Constants.ElevatorConstants.rightElevatorMotorPort));
-    private final Limelight s_Limelight = new Limelight(rightDriveJoystick, leftDriveJoystick);
+    private final Limelight s_Limelight = new Limelight();
+    private final Drive s_Drive = new Drive(drivetrain, leftDriveJoystick, MaxSpeed, MaxAngularRate, drive, rightDriveJoystick, s_Limelight);
 
     public RobotContainer() {
         configureBindings();
@@ -68,13 +69,6 @@ public class RobotContainer {
 
     private void configureBindings() {
 
-
-
-        drivetrain.setDefaultCommand(drivetrain.applyRequest(() ->
-                drive.withVelocityX(-leftDriveJoystick.getY() * MaxSpeed) // Drive forward with negative Y (forward)
-                        .withVelocityY(-leftDriveJoystick.getX() * MaxSpeed) // Drive left with negative X (left)
-                        .withRotationalRate(-rightDriveJoystick.getX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
-        ));
         leftDriveButton4.whileTrue(drivetrain.applyRequest(() -> brake));
         leftDriveButton3.whileTrue(drivetrain.applyRequest(() ->
                 point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
