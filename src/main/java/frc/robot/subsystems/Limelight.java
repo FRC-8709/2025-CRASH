@@ -1,37 +1,55 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.swerve.SwerveDrivetrain;
-import com.ctre.phoenix6.swerve.SwerveRequest;
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 
 public class Limelight extends SubsystemBase {
-    private boolean isCentered = false;
+    private boolean rightIsCentered = false;
+    private boolean leftIsCentered = false;
+    private double txRight;
+    private double txLeft;
+    private double rightTagID;
+    private double leftTagID;
 
     @Override
     public void periodic() {
-        double txRight = NetworkTableInstance.getDefault().getTable("limelight-right").getEntry("tx").getDouble(0.0);
-        double txLeft = NetworkTableInstance.getDefault().getTable("limelight-left").getEntry("tx").getDouble(0.0);
+        rightTagID = NetworkTableInstance.getDefault().getTable("limelight-right").getEntry("tid").getDouble(0);
+        leftTagID = NetworkTableInstance.getDefault().getTable("limelight-left").getEntry("tid").getDouble(0);
+        txRight = NetworkTableInstance.getDefault().getTable("limelight-right").getEntry("tx").getDouble(-100.0);
+        txLeft = NetworkTableInstance.getDefault().getTable("limelight-left").getEntry("tx").getDouble(-100.0);
         SmartDashboard.putNumber("txRight", txRight);
         SmartDashboard.putNumber("txLeft", txLeft);
-        if (txRight < -6 && txLeft > 11) {
-            isCentered = true;
+        SmartDashboard.putNumberArray("botPose", LimelightHelpers.getBotPose("limelight-right"));
+        //min -30, max 30, center 0
+        //-5.5
+        if (txRight > 0 && rightTagID != -1) {
+            rightIsCentered = true;
         }
         else {
-            isCentered = false;
+            rightIsCentered = false;
         }
-        SmartDashboard.putBoolean("isCentered", centered());
+        if (txLeft < -3.1 && leftTagID != -1) {
+            leftIsCentered = true;
+        }
+        else {
+            leftIsCentered = false;
+        }
+        SmartDashboard.putBoolean("isCentered", rightCentered());
     }
-    public boolean centered() {
-        return isCentered;
+    public boolean rightCentered() {
+        return rightIsCentered;
+    }
+    public boolean leftCentered() {
+        return leftIsCentered;
+    }
+    public double getRightX() {
+        return txRight;
+    }
+    public double getLeftX() {
+        return txLeft;
     }
 }
 

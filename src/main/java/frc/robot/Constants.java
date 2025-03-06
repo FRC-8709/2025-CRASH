@@ -16,8 +16,7 @@ public class Constants {
         }
     }
     public class CoralIntakeConstants {
-    //     public static int topBreakBeamPort = 9;
-    //     public static int bottomBreakBeamPort = 10;
+        public static int beamBreakPort = 9;
         public static int coralIntakeMotorPort = 24;
         public static final VoltageOut kCoralIntakeVoltageOut = new VoltageOut(0);
     }
@@ -31,7 +30,7 @@ public class Constants {
         public static final int bottomLimitSwitchPort = 8;
 
         public static final int leftElevatorMotorPort = 28;
-        public static final int rightElevatorMotorPort = 29;
+        public static final int rightElevatorMotorPort = 18;
     }
 
     public static final class ClimberConstants {

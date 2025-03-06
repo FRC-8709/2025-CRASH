@@ -34,9 +34,10 @@ public class Elevator extends SubsystemBase {
         followerMotor.setControl(ElevatorConstants.kElevatorVoltageOut.withOutput(-speed));
     }
     public StatusSignal<Angle> getElevatorPosition() {
-        return masterMotor.getPosition();
+        return followerMotor.getPosition();
     }
     public void resetElevatorPosition() {
-        masterMotor.setPosition(0.0f);
+        masterMotor.setPosition(0.0);
+        followerMotor.setPosition(0.0);
     }
 }
