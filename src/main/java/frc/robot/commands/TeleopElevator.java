@@ -19,6 +19,7 @@ public class TeleopElevator extends Command {
     private final DigitalInput bottomLimitSwitch;
 
     private double commandedPosition = 0;
+    private boolean x = false;
 
     public TeleopElevator(Elevator m_subsystem, Joystick leftOpJoystick, DigitalInput bottomLimitSwitch) {
         this.m_subsystem = m_subsystem;
@@ -42,9 +43,8 @@ public class TeleopElevator extends Command {
         if (leftOpJoystick.getRawButtonPressed(7)) commandedPosition = -138.5;
         if (leftOpJoystick.getRawButtonPressed(9)) commandedPosition = -89.5;
         if (leftOpJoystick.getRawButtonPressed(11)) commandedPosition = -56;
-        if (leftOpJoystick.getRawButtonPressed(12)) commandedPosition = 0.0;
         if (leftOpJoystick.getRawButtonPressed(6)) commandedPosition = elevatorPosition - 5;
-        else if (leftOpJoystick.getRawButtonPressed(4) && elevatorPosition < -5.0) commandedPosition = elevatorPosition + 5;
+        if (leftOpJoystick.getRawButtonPressed(12) && bottomLimitSwitch.get()) commandedPosition = elevatorPosition + 0.3;
 
         SmartDashboard.putBoolean("bottomLimitSwitch", bottomLimitSwitch.get());
         SmartDashboard.putNumber("Elevator Position", elevatorPosition);
@@ -53,6 +53,13 @@ public class TeleopElevator extends Command {
         if (!bottomLimitSwitch.get()) {
             m_subsystem.resetElevatorPosition();
             elevatorPosition = 0.0;
+        }
+        if (!bottomLimitSwitch.get() && !x) {
+            commandedPosition = 0.0;
+            x = true;
+        }
+        if (bottomLimitSwitch.get()) {
+            x = false;
         }
 
         m_subsystem.masterMotor.setControl(new PositionDutyCycle(commandedPosition).withSlot(0));
