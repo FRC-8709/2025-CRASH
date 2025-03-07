@@ -1,10 +1,10 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Drive extends SubsystemBase {
@@ -25,6 +25,7 @@ public class Drive extends SubsystemBase {
     private final Joystick leftDriveJoystick;
     private final double MaxSpeed;
     private final double MaxAngularRate;
+    DriveState teleopControl = DriveState.JOYSTICK_CONTROL;
 
     public Drive(CommandSwerveDrivetrain drivetrain, Joystick leftDriveJoystick, double MaxSpeed, double MaxAngularRate, SwerveRequest.FieldCentric drive, Joystick rightDriveJoystick, Limelight s_Limelight) {
         this.drive = drive;
@@ -38,7 +39,6 @@ public class Drive extends SubsystemBase {
 
     @Override
     public void periodic() {
-        DriveState teleopControl;
         rightTagID = NetworkTableInstance.getDefault().getTable("limelight-right").getEntry("tid").getDouble(0);
         leftTagID = NetworkTableInstance.getDefault().getTable("limelight-left").getEntry("tid").getDouble(0);
         SmartDashboard.putNumber("Right Tag ID", rightTagID);
@@ -70,15 +70,9 @@ public class Drive extends SubsystemBase {
                             .withVelocityX(0.15)
                             .withRotationalRate(0.0)
                     );
-                } else if (s_Limelight.getRightX() > -11) {
+                } else if (s_Limelight.getRightX() < -11) {
                     drivetrain.setControl(robotCentric
                             .withVelocityY(0.15)
-                            .withVelocityX(0.15)
-                            .withRotationalRate(0.0)
-                    );
-                } else if (s_Limelight.getRightX() > 5) {
-                    drivetrain.setControl(robotCentric
-                            .withVelocityY(-0.15)
                             .withVelocityX(0.15)
                             .withRotationalRate(0.0)
                     );
@@ -109,12 +103,6 @@ public class Drive extends SubsystemBase {
                             .withVelocityX(0.15)
                             .withRotationalRate(0.0)
                     );
-                } else if (s_Limelight.getLeftX() < -8.1) {
-                    drivetrain.setControl(robotCentric
-                            .withVelocityY(0.15)
-                            .withVelocityX(0.15)
-                            .withRotationalRate(0.0)
-                    );
                 } else {
                     drivetrain.setControl(robotCentric
                             .withVelocityY(0.0)
@@ -124,4 +112,12 @@ public class Drive extends SubsystemBase {
                 }
         }
     }
+//    public Command alignBot() {
+//        return this.runOnce(() -> {
+//            try {
+//                teleopControl = DriveState.ALIGN_LEFT;
+//                wait(3000);
+//            } catch (Exception ignored) {}
+//        });
 }
+

@@ -6,11 +6,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Climb extends SubsystemBase {
     private final TalonFX climbMotor;
+
     public Climb(TalonFX climbMotor) {
         this.climbMotor = climbMotor;
 
         climbMotor.setNeutralMode(NeutralModeValue.Brake);
     }
+
     public void setSpeed(double speed) {
         climbMotor.set(speed);
     }

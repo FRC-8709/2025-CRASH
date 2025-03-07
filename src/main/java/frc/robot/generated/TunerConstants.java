@@ -213,8 +213,8 @@ public class TunerConstants {
          * the devices themselves. If they need the devices, they can access them through
          * getters in the classes.
          *
-         * @param drivetrainConstants   Drivetrain-wide constants for the swerve drive
-         * @param modules               Constants for each specific module
+         * @param drivetrainConstants Drivetrain-wide constants for the swerve drive
+         * @param modules             Constants for each specific module
          */
         public TunerSwerveDrivetrain(
                 SwerveDrivetrainConstants drivetrainConstants,

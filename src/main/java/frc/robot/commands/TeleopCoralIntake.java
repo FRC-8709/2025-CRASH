@@ -11,7 +11,7 @@ public class TeleopCoralIntake extends Command {
     private final Joystick rightOpJoystick;
     private final DigitalInput beamBreak;
 
-    public TeleopCoralIntake (CoralIntake m_subsystem, Joystick rightOpJoystick, DigitalInput beamBreak) {
+    public TeleopCoralIntake(CoralIntake m_subsystem, Joystick rightOpJoystick, DigitalInput beamBreak) {
         this.m_subsystem = m_subsystem;
         this.rightOpJoystick = rightOpJoystick;
         this.beamBreak = beamBreak;
@@ -20,18 +20,17 @@ public class TeleopCoralIntake extends Command {
 
     @Override
     public void execute() {
-        if ( rightOpJoystick.getRawButton(5)) {
+        if (rightOpJoystick.getRawButton(5)) {
             speed = 4;
-        }
-        else if (!beamBreak.get()) {
-            speed = 2;
-        }
-        else if (rightOpJoystick.getRawButton(6)) {
-            speed = -2;
-        }
-        else {
+        } else if (!beamBreak.get()) {
+            speed = 0.8;
+        } else if (rightOpJoystick.getRawButton(6)) {
+            speed = -1;
+        } else {
             speed = 0;
         }
         m_subsystem.setMotorSpeed(speed);
     }
+
+
 }

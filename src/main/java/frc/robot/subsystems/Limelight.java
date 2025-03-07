@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -23,31 +22,32 @@ public class Limelight extends SubsystemBase {
         SmartDashboard.putNumber("txRight", txRight);
         SmartDashboard.putNumber("txLeft", txLeft);
         SmartDashboard.putNumberArray("botPose", LimelightHelpers.getBotPose("limelight-right"));
-        //min -30, max 30, center 0
-        //-5.5
+
         if (txRight > 0 && rightTagID != -1) {
             rightIsCentered = true;
-        }
-        else {
+        } else {
             rightIsCentered = false;
         }
         if (txLeft < -3.1 && leftTagID != -1) {
             leftIsCentered = true;
-        }
-        else {
+        } else {
             leftIsCentered = false;
         }
         SmartDashboard.putBoolean("isCentered", rightCentered());
     }
+
     public boolean rightCentered() {
         return rightIsCentered;
     }
+
     public boolean leftCentered() {
         return leftIsCentered;
     }
+
     public double getRightX() {
         return txRight;
     }
+
     public double getLeftX() {
         return txLeft;
     }

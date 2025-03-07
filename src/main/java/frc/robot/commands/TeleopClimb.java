@@ -5,11 +5,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Climb;
 
 public class TeleopClimb extends Command {
-    private final Joystick leftOpJoystick;
+    private final Joystick buttonBox;
     private final Climb m_subsystem;
     private double speed;
-    public TeleopClimb(Joystick leftOpJoystick, Climb subsystem) {
-        this.leftOpJoystick = leftOpJoystick;
+
+    public TeleopClimb(Joystick buttonBox, Climb subsystem) {
+        this.buttonBox = buttonBox;
         this.m_subsystem = subsystem;
 
         addRequirements(m_subsystem);
@@ -17,13 +18,11 @@ public class TeleopClimb extends Command {
 
     @Override
     public void execute() {
-        if (leftOpJoystick.getRawButton(3)) {
+        if (buttonBox.getRawButton(18)) {
             speed = 3.0;
-        }
-        else if (leftOpJoystick.getRawButton(5)) {
+        } else if (buttonBox.getRawButton(19)) {
             speed = -3.0;
-        }
-        else {
+        } else {
             speed = 0.0;
         }
         m_subsystem.setSpeed(speed);

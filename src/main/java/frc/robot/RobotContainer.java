@@ -5,14 +5,10 @@
 package frc.robot;
 
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.math.estimator.PoseEstimator;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Pose2d;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
@@ -49,9 +45,10 @@ public class RobotContainer {
     private final DigitalInput beamBreak = new DigitalInput(Constants.CoralIntakeConstants.beamBreakPort);
 
     private final Joystick leftDriveJoystick = new Joystick(0);
-    private final Joystick rightDriveJoystick = new Joystick(3);
+    private final Joystick rightDriveJoystick = new Joystick(2);
     private final Joystick leftOpJoystick = new Joystick(1);
-    private final Joystick rightOpJoystick = new Joystick(2);
+    private final Joystick rightOpJoystick = new Joystick(3);
+    //private final Joystick buttonBox = new Joystick(0);
 
     private final JoystickButton leftDriveButton6 = new JoystickButton(leftDriveJoystick, 6);
     private final JoystickButton leftDriveButton4 = new JoystickButton(leftDriveJoystick, 4);
@@ -82,33 +79,27 @@ public class RobotContainer {
     private final Path s_Path = new Path();
 
     public RobotContainer() {
+
         configureBindings();
 
         s_Climb.setDefaultCommand(new TeleopClimb(leftOpJoystick, s_Climb));
         s_CoralIntake.setDefaultCommand(new TeleopCoralIntake(s_CoralIntake, rightOpJoystick, beamBreak));
         s_Elevator.setDefaultCommand(new TeleopElevator(s_Elevator, leftOpJoystick, new DigitalInput(Constants.ElevatorConstants.bottomLimitSwitchPort)));
+        //NamedCommands.registerCommand("alignBot", s_Drive.alignBot());
+        NamedCommands.registerCommand("elevatorUp", s_Elevator.elevatorUp().withTimeout(3));
+        NamedCommands.registerCommand("scoreCoral", s_CoralIntake.scoreCoral());
+
     }
 
     private void configureBindings() {
         //blue alliance
-//        rightOpButton7.onTrue(s_Path.goToPose(new Pose2d(3.542, 5.577, Rotation2d.fromDegrees(-60.0))));
-//        rightOpButton8.onTrue(s_Path.goToPose(new Pose2d(2.588, 4.110, Rotation2d.fromDegrees(0))));
-//        rightOpButton9.onTrue(s_Path.goToPose(new Pose2d(3.557, 2.462, Rotation2d.fromDegrees(60.0))));
-//        rightOpButton10.onTrue(s_Path.goToPose(new Pose2d(5.452, 2.447, Rotation2d.fromDegrees(120.0))));
-//        rightOpButton11.onTrue(s_Path.goToPose(new Pose2d(6.332, 3.963, Rotation2d.fromDegrees(180.0))));
-//        rightOpButton12.onTrue(s_Path.goToPose(new Pose2d(5.404, 5.630, Rotation2d.fromDegrees(-120.0))));
-//        rightOpTrigger.onTrue(s_Path.goToPose(new Pose2d(1.268, 6.927, Rotation2d.fromDegrees(-55.0))));
-
-        //red alliance
-//        rightOpButton7.onTrue(s_Path.goToPose(new Pose2d(14.097, 2.376, Rotation2d.fromDegrees(120.0))));
-//        rightOpButton8.onTrue(s_Path.goToPose(new Pose2d(14.971, 4.004, Rotation2d.fromDegrees(180.0))));
-//        rightOpButton9.onTrue(s_Path.goToPose(new Pose2d(14.015, 5.632, Rotation2d.fromDegrees(-120.0))));
-//        rightOpButton10.onTrue(s_Path.goToPose(new Pose2d(12.129, 5.623, Rotation2d.fromDegrees(-60.0))));
-//        rightOpButton11.onTrue(s_Path.goToPose(new Pose2d(11.200, 4.096, Rotation2d.fromDegrees(0))));
-//        rightOpButton12.onTrue(s_Path.goToPose(new Pose2d(12.110, 2.422, Rotation2d.fromDegrees(60.0))));
-//        rightOpTrigger.onTrue(s_Path.goToPose(new Pose2d(16.275, 1.137, Rotation2d.fromDegrees(125.0))));
-
-
+//        buttonBoxButton1.onTrue(s_Path.goToPose(new Pose2d(3.542, 5.577, Rotation2d.fromDegrees(-60.0))));
+//        buttonBoxButton3.onTrue(s_Path.goToPose(new Pose2d(2.588, 4.110, Rotation2d.fromDegrees(0))));
+//        buttonBoxButton5.onTrue(s_Path.goToPose(new Pose2d(3.557, 2.462, Rotation2d.fromDegrees(60.0))));
+//        buttonBoxButton7.onTrue(s_Path.goToPose(new Pose2d(5.452, 2.447, Rotation2d.fromDegrees(120.0))));
+//        buttonBoxButton9.onTrue(s_Path.goToPose(new Pose2d(6.332, 3.963, Rotation2d.fromDegrees(180.0))));
+//        buttonBoxButton11.onTrue(s_Path.goToPose(new Pose2d(5.404, 5.630, Rotation2d.fromDegrees(-120.0))));
+//        buttonBoxButton13.onTrue(s_Path.goToPose(new Pose2d(1.268, 6.927, Rotation2d.fromDegrees(-55.0))));
 
         leftDriveButton4.whileTrue(drivetrain.applyRequest(() -> brake));
         leftDriveButton3.whileTrue(drivetrain.applyRequest(() ->
@@ -126,11 +117,10 @@ public class RobotContainer {
         leftDriveButton6.onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
 
-
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
     public Command getAutonomousCommand() {
-        return Commands.print("No autonomous command configured");
+        return new PathPlannerAuto("Middle Auto Blue");
     }
 }
