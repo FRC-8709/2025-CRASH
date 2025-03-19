@@ -12,16 +12,20 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.commands.TeleopAlgaeIntake;
 import frc.robot.commands.TeleopClimb;
 import frc.robot.commands.TeleopCoralIntake;
 import frc.robot.commands.TeleopElevator;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
+import frc.robot.utils.Elastic;
 
 import static edu.wpi.first.units.Units.*;
 
@@ -41,6 +45,8 @@ public class RobotContainer {
     private final CommandXboxController joystick = new CommandXboxController(0);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+
+    private final SendableChooser<String> autos = new SendableChooser<>();
 
     private final DigitalInput beamBreak = new DigitalInput(Constants.CoralIntakeConstants.beamBreakPort);
 
@@ -71,23 +77,35 @@ public class RobotContainer {
     private final JoystickButton rightOpButton12 = new JoystickButton(rightOpJoystick, 12);
     private final JoystickButton rightOpTrigger = new JoystickButton(rightOpJoystick, 1);
 
-    private final Climb s_Climb = new Climb(new TalonFX(Constants.ClimberConstants.climberMotorPort));
+    private final Climb s_Climb = new Climb(new TalonFX(Constants.ClimberConstants.climberMotorPort), new TalonFX(Constants.ClimberConstants.reciverMotorPort));
     private final CoralIntake s_CoralIntake = new CoralIntake(new TalonFX(Constants.CoralIntakeConstants.coralIntakeMotorPort));
-    private final Elevator s_Elevator = new Elevator(new TalonFX(Constants.ElevatorConstants.leftElevatorMotorPort), new TalonFX(Constants.ElevatorConstants.rightElevatorMotorPort));
+    private final Elevator s_Elevator = new Elevator(new TalonFX(Constants.ElevatorConstants.leftElevatorMotorPort), new TalonFX(Constants.ElevatorConstants.rightElevatorMotorPort)    );
     private final Limelight s_Limelight = new Limelight();
-    private final Drive s_Drive = new Drive(drivetrain, leftDriveJoystick, MaxSpeed, MaxAngularRate, drive, rightDriveJoystick, s_Limelight);
+    private final AutoAlignment s_AutoAlignment = new AutoAlignment(s_Limelight);
+    private final Drive s_Drive = new Drive(drivetrain, leftDriveJoystick, MaxSpeed, MaxAngularRate, drive, rightDriveJoystick, s_Limelight, s_AutoAlignment);
     private final Path s_Path = new Path();
+    private final TeleopElevator teleopElevator = new TeleopElevator(s_Elevator, leftOpJoystick, new DigitalInput(Constants.ElevatorConstants.bottomLimitSwitchPort), rightOpJoystick);
+    private final AlgaeIntake s_AlgaeIntake = new AlgaeIntake(new TalonFX(Constants.AlgaeIntakeConstants.algaeIntakeMotorPort));
 
     public RobotContainer() {
 
         configureBindings();
 
-        s_Climb.setDefaultCommand(new TeleopClimb(leftOpJoystick, s_Climb));
-        s_CoralIntake.setDefaultCommand(new TeleopCoralIntake(s_CoralIntake, rightOpJoystick, beamBreak));
-        s_Elevator.setDefaultCommand(new TeleopElevator(s_Elevator, leftOpJoystick, new DigitalInput(Constants.ElevatorConstants.bottomLimitSwitchPort)));
+        s_Climb.setDefaultCommand(new TeleopClimb(rightDriveJoystick, s_Climb));
+        s_CoralIntake.setDefaultCommand(new TeleopCoralIntake(s_CoralIntake, rightOpJoystick, beamBreak, teleopElevator));
+        s_Elevator.setDefaultCommand(teleopElevator);
+        s_AlgaeIntake.setDefaultCommand(new TeleopAlgaeIntake(rightOpJoystick, s_AlgaeIntake));
+        autos.addOption("Top Auto", "Top Auto");
+        autos.addOption("Middle Auto", "Middle Auto");
+        autos.addOption("Bottom Auto", "Bottom Auto");
+        SmartDashboard.putData("Auto Selection", autos);
         //NamedCommands.registerCommand("alignBot", s_Drive.alignBot());
-        NamedCommands.registerCommand("elevatorUp", s_Elevator.elevatorUp().withTimeout(3));
+        NamedCommands.registerCommand("elevatorUp", s_Elevator.elevatorUp());
+        NamedCommands.registerCommand("elevatorDown", s_Elevator.elevatorDown());
         NamedCommands.registerCommand("scoreCoral", s_CoralIntake.scoreCoral());
+        NamedCommands.registerCommand("intakeAlgae", s_AlgaeIntake.intakeAlgae());
+
+
 
     }
 
@@ -121,6 +139,6 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return new PathPlannerAuto("Middle Auto Blue");
+        return new PathPlannerAuto(autos.getSelected());
     }
 }

@@ -16,14 +16,17 @@ public class TeleopElevator extends Command {
 
     private final Elevator m_subsystem;
     private final Joystick leftOpJoystick;
+    private final Joystick rightOpJoystick;
     private final DigitalInput bottomLimitSwitch;
+    private double elevatorPosition;
 
     private boolean x = false;
 
-    public TeleopElevator(Elevator m_subsystem, Joystick leftOpJoystick, DigitalInput bottomLimitSwitch) {
+    public TeleopElevator(Elevator m_subsystem, Joystick leftOpJoystick, DigitalInput bottomLimitSwitch, Joystick rightOpJoystick) {
         this.m_subsystem = m_subsystem;
         this.leftOpJoystick = leftOpJoystick;
         this.bottomLimitSwitch = bottomLimitSwitch;
+        this.rightOpJoystick = rightOpJoystick;
 
         addRequirements(m_subsystem);
         Slot0Configs configs = new Slot0Configs();
@@ -37,17 +40,19 @@ public class TeleopElevator extends Command {
     @Override
     public void execute() {
 
-        double elevatorPosition = m_subsystem.getElevatorPosition().getValueAsDouble();
+        elevatorPosition = m_subsystem.getElevatorPosition().getValueAsDouble();
 
         if (leftOpJoystick.getRawButtonPressed(7)) m_subsystem.setCommandedPosition(-136.5);
         if (leftOpJoystick.getRawButtonPressed(9)) m_subsystem.setCommandedPosition(-87.5);
         if (leftOpJoystick.getRawButtonPressed(11)) m_subsystem.setCommandedPosition(-54);
         if (leftOpJoystick.getRawButtonPressed(12) && bottomLimitSwitch.get()) m_subsystem.setCommandedPosition(elevatorPosition + 0.3);
-
+        if (rightOpJoystick.getRawButtonPressed(9)) m_subsystem.setCommandedPosition(-48.5);
+        if (rightOpJoystick.getRawButtonPressed(11)) m_subsystem.setCommandedPosition(-8);
+        if (rightOpJoystick.getRawButtonPressed(12) && bottomLimitSwitch.get()) m_subsystem.setCommandedPosition(elevatorPosition + 0.3);
         SmartDashboard.putBoolean("bottomLimitSwitch", bottomLimitSwitch.get());
         SmartDashboard.putNumber("Elevator Position", elevatorPosition);
 
-        if (!bottomLimitSwitch.get()) {
+        if (!bottomLimitSwitch.get() && elevatorPosition > -20) {
             m_subsystem.resetElevatorPosition();
             elevatorPosition = 0.0;
         }
@@ -59,11 +64,13 @@ public class TeleopElevator extends Command {
             x = false;
         }
 
-
-        if (elevatorPosition > 90) RobotContainer.MaxSpeed = 0.75;
+                if (elevatorPosition > 90) RobotContainer.MaxSpeed = 0.75;
         else if (elevatorPosition > 60) RobotContainer.MaxSpeed = 1.5;
         else if (elevatorPosition > 15) RobotContainer.MaxSpeed = 2.96;
         else RobotContainer.MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
         SmartDashboard.putNumber("Max Speed", RobotContainer.MaxSpeed);
+    }
+    public double getElevatorPosition() {
+        return elevatorPosition;
     }
 }

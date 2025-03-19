@@ -20,6 +20,10 @@ public class Constants {
         public static int coralIntakeMotorPort = 24;
         public static final VoltageOut kCoralIntakeVoltageOut = new VoltageOut(0);
     }
+    public class AlgaeIntakeConstants {
+        public static int algaeIntakeMotorPort = 23;
+        public static final VoltageOut kAlgaeIntakeVoltageOut = new VoltageOut(0);
+    }
     public class PathPlannerConstants {
         public static final PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI);
     }
@@ -34,6 +38,7 @@ public class Constants {
     }
 
     public static final class ClimberConstants {
-        public static final int climberMotorPort = 30;
+        public static final int climberMotorPort = 19;
+        public static final int reciverMotorPort = 30;
     }
 }
